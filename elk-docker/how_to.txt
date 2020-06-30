@@ -1,0 +1,11 @@
+start: 
+	docker-compose up -d
+	
+stop: 
+	docker-compose stop
+	
+reset:
+	docker-compose rm -vfs
+	
+logs: 
+	docker logs <name of docker container>

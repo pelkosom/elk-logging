@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.8'
 
 services:
 
@@ -13,7 +13,7 @@ services:
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
-      - elk
+      - qats
 
   logstash:
     build:
@@ -26,7 +26,7 @@ services:
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
-      - elk
+      - qats
     depends_on:
       - elasticsearch
 
@@ -38,11 +38,47 @@ services:
     ports:
       - "5601:5601"
     networks:
-      - elk
+      - qats
     depends_on:
       - elasticsearch
 
+  jenkins:
+    image: jenkins/jenkins:2.235.2-lts-centos7
+    user: root
+    ports:
+      - 8080:8080
+      - 50000:50000
+    container_name: qats-jenkins
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    volumes:
+      - ./jenkinsVolume:/var/jenkins_home
+    networks:
+      - qats
+    depends_on:
+      - elasticsearch
+
+  jira:
+    image: atlassian/jira-software:8.12.0-EAP01-jdk11
+    user: root
+    ports:
+      - 8081:8080
+    container_name: qats-jira
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    volumes:
+      - ./jiraVolume:/var/atlassian/application-data/jira
+    networks:
+      - qats
+    depends_on:
+      - elasticsearch
+
+volumes:
+  jenkinsVolume:
+  bambooVolume:
+  jiraVolume:
+
 networks:
 
-  elk:
+  qats:
     driver: bridge
